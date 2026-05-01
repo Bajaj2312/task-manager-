@@ -27,30 +27,32 @@ const CreateProjectModal = ({ onClose, onCreate }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">New Project</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <h2 className="modal-title">Initialize New Project</h2>
+          <button className="modal-close" onClick={onClose}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
-        {error && <div className="error-msg">{error}</div>}
+        {error && <div className="error-msg">⚠️ {error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">Project Name *</label>
-            <input className="form-input" placeholder="e.g., Website Redesign" value={form.name}
+            <label className="form-label">Project Name</label>
+            <input className="form-input" placeholder="e.g., Apollo Launch" value={form.name}
               onChange={e => setForm({ ...form, name: e.target.value })} required />
           </div>
           <div className="form-group">
-            <label className="form-label">Description</label>
-            <textarea className="form-input" rows={3} placeholder="What is this project about?"
+            <label className="form-label">Objective Description</label>
+            <textarea className="form-input" rows={3} placeholder="What is the primary goal?"
               value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
           </div>
           <div className="form-group">
-            <label className="form-label">Due Date</label>
+            <label className="form-label">Target Completion Date</label>
             <input type="date" className="form-input" value={form.dueDate}
               onChange={e => setForm({ ...form, dueDate: e.target.value })} />
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Project'}
+              {loading ? 'Initializing...' : 'Launch Project'}
             </button>
           </div>
         </form>
@@ -69,49 +71,75 @@ const ProjectsPage = () => {
     api.get('/projects').then(res => setProjects(res.data)).finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="loading"><div className="spinner"></div>Loading projects...</div>;
+  if (loading) return (
+    <div className="loading-container">
+      <div className="pulse-ring"></div>
+      <p>Loading projects...</p>
+    </div>
+  );
 
   return (
-    <div>
-      <div className="page-header">
+    <div className="projects-page-container">
+      <div className="page-header sticky-header">
         <div>
-          <h1 className="page-title">Projects</h1>
-          <p className="page-subtitle">{projects.length} project{projects.length !== 1 ? 's' : ''} you're part of</p>
+          <h1 className="page-title">Workspace Projects</h1>
+          <p className="page-subtitle">You are actively participating in {projects.length} project{projects.length !== 1 ? 's' : ''}</p>
         </div>
         {user.role === 'admin' && (
-          <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
-            + New Project
+          <button className="btn btn-primary btn-glow" onClick={() => setShowCreate(true)}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px'}}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            New Project
           </button>
         )}
       </div>
 
       {projects.length === 0 ? (
-        <div className="empty-state">
-          <div className="icon">📁</div>
-          <p>No projects yet.{user.role === 'admin' ? ' Create one to get started!' : ' Ask an admin to add you to a project.'}</p>
+        <div className="empty-state glass-empty">
+          <div className="icon">🌌</div>
+          <p>The workspace is empty.{user.role === 'admin' ? ' Initialize a new project to begin.' : ' Wait for an admin to assign you to a project.'}</p>
         </div>
       ) : (
-        <div className="projects-grid">
-          {projects.map(project => {
+        <div className="modern-projects-grid">
+          {projects.map((project, index) => {
             const isOwner = project.owner?._id === user._id || project.owner === user._id;
             return (
-              <Link key={project._id} to={`/projects/${project._id}`} className="project-card">
-                <div className="project-card-header">
-                  <div className="project-card-icon">📁</div>
-                  <span className={`badge badge-${project.status}`}>{project.status}</span>
-                </div>
-                <h3 className="project-card-name">{project.name}</h3>
-                {project.description && (
-                  <p className="project-card-desc">{project.description}</p>
-                )}
-                <div className="project-card-footer">
-                  <span className="project-card-meta">👤 {project.members?.length || 0} members</span>
-                  {project.dueDate && (
-                    <span className="project-card-meta">
-                      📅 {new Date(project.dueDate).toLocaleDateString()}
-                    </span>
-                  )}
-                  {isOwner && <span className="badge badge-admin" style={{fontSize:'11px'}}>Owner</span>}
+              <Link 
+                key={project._id} 
+                to={`/projects/${project._id}`} 
+                className="modern-project-card glass-card"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="card-bg-glow"></div>
+                <div className="card-content-inner">
+                  <div className="project-card-header">
+                    <div className="project-card-icon-wrapper">
+                      <span className="project-card-icon">✨</span>
+                    </div>
+                    <span className={`badge badge-${project.status} pill`}>{project.status}</span>
+                  </div>
+                  
+                  <div className="project-info-body">
+                    <h3 className="project-card-name">{project.name}</h3>
+                    {project.description ? (
+                      <p className="project-card-desc">{project.description}</p>
+                    ) : (
+                      <p className="project-card-desc empty-desc">No description provided.</p>
+                    )}
+                  </div>
+
+                  <div className="project-card-footer">
+                    <div className="members-cluster">
+                      <div className="member-avatar placeholder">👥 {project.members?.length || 0}</div>
+                    </div>
+                    <div className="footer-right">
+                      {project.dueDate && (
+                        <span className="due-date-pill">
+                          ⏳ {new Date(project.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </span>
+                      )}
+                      {isOwner && <span className="owner-crown" title="Project Owner">👑</span>}
+                    </div>
+                  </div>
                 </div>
               </Link>
             );

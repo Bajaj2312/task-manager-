@@ -6,7 +6,7 @@ import './Layout.css';
 const Layout = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -14,79 +14,88 @@ const Layout = () => {
   };
 
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: '📊' },
-    { path: '/projects', label: 'Projects', icon: '📁' },
-    ...(user?.role === 'admin' ? [{ path: '/users', label: 'Users', icon: '👥' }] : []),
+    { path: '/dashboard', label: 'Dashboard', icon: '✨' },
+    { path: '/projects', label: 'Projects', icon: '🔮' },
+    ...(user?.role === 'admin' ? [{ path: '/users', label: 'Team', icon: '👥' }] : []),
   ];
 
   return (
     <div className="layout">
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
-      )}
-
-      {/* Sidebar */}
-      <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
-        <div className="sidebar-header">
+      {/* Top Navigation */}
+      <header className="top-nav glass">
+        <div className="nav-container">
           <div className="logo">
-            <span className="logo-icon">⚡</span>
-            <span className="logo-text">TaskFlow</span>
+            <div className="logo-orb"></div>
+            <span className="logo-text">NexusFlow</span>
+          </div>
+
+          {/* Desktop Nav */}
+          <nav className="desktop-nav">
+            {navItems.map(item => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}
+              >
+                <span className="nav-icon">{item.icon}</span>
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="nav-right">
+            <div className="user-profile">
+              <div className="avatar">
+                {user?.name?.[0]?.toUpperCase() || 'U'}
+              </div>
+              <div className="user-details-nav">
+                <span className="user-name">{user?.name?.split(' ')[0]}</span>
+                <span className="user-role-text">{user?.role}</span>
+              </div>
+            </div>
+            <button className="btn-logout" onClick={handleLogout} title="Logout">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </button>
+
+            {/* Mobile Menu Toggle */}
+            <button className="mobile-menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? '✕' : '☰'}
+            </button>
           </div>
         </div>
+      </header>
 
-        <nav className="sidebar-nav">
+      {/* Mobile Nav Dropdown */}
+      {menuOpen && (
+        <div className="mobile-nav glass">
           {navItems.map(item => (
             <NavLink
               key={item.path}
               to={item.path}
-              className={({ isActive }) => `nav-item ${isActive ? 'nav-item-active' : ''}`}
-              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}
+              onClick={() => setMenuOpen(false)}
             >
               <span className="nav-icon">{item.icon}</span>
-              <span>{item.label}</span>
+              {item.label}
             </NavLink>
           ))}
-        </nav>
-
-        <div className="sidebar-footer">
-          <div className="user-info">
-            <div className="user-avatar">
-              {user?.name?.[0]?.toUpperCase() || 'U'}
-            </div>
-            <div className="user-details">
-              <div className="user-name">{user?.name}</div>
-              <div className="user-role">
-                <span className={`badge badge-${user?.role}`}>{user?.role}</span>
-              </div>
-            </div>
-          </div>
-          <button className="logout-btn" onClick={handleLogout}>
-            🚪 Logout
+          <button className="mobile-nav-item logout-mobile" onClick={handleLogout}>
+            <span className="nav-icon">🚪</span>
+            Logout
           </button>
         </div>
-      </aside>
+      )}
 
-      {/* Main content */}
-      <div className="main">
-        <header className="topbar">
-          <button
-            className="hamburger"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            ☰
-          </button>
-          <div className="topbar-right">
-            <span className="welcome-text">
-              Welcome back, <strong>{user?.name?.split(' ')[0]}</strong>
-            </span>
-          </div>
-        </header>
-
-        <main className="content">
+      {/* Main Content Area */}
+      <main className="main-content">
+        <div className="content-container">
           <Outlet />
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };

@@ -39,25 +39,27 @@ const TaskModal = ({ task, project, users, onClose, onSave }) => {
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">{task ? 'Edit Task' : 'New Task'}</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <button className="modal-close" onClick={onClose}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
-        {error && <div className="error-msg">{error}</div>}
+        {error && <div className="error-msg">⚠️ {error}</div>}
         <form onSubmit={handleSubmit}>
           {isAdmin && (
             <>
               <div className="form-group">
-                <label className="form-label">Title *</label>
-                <input className="form-input" placeholder="Task title" value={form.title}
+                <label className="form-label">Task Title</label>
+                <input className="form-input" placeholder="What needs to be done?" value={form.title}
                   onChange={e => setForm({ ...form, title: e.target.value })} required />
               </div>
               <div className="form-group">
-                <label className="form-label">Description</label>
-                <textarea className="form-input" rows={2} placeholder="Optional description"
+                <label className="form-label">Details</label>
+                <textarea className="form-input" rows={2} placeholder="Add more context..."
                   value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label">Assign To</label>
+                  <label className="form-label">Assignee</label>
                   <select className="form-input" value={form.assignedTo}
                     onChange={e => setForm({ ...form, assignedTo: e.target.value })}>
                     <option value="">Unassigned</option>
@@ -87,7 +89,7 @@ const TaskModal = ({ task, project, users, onClose, onSave }) => {
             <label className="form-label">Status</label>
             <select className="form-input" value={form.status}
               onChange={e => setForm({ ...form, status: e.target.value })}>
-              <option value="todo">Todo</option>
+              <option value="todo">To Do</option>
               <option value="in-progress">In Progress</option>
               <option value="completed">Completed</option>
             </select>
@@ -95,7 +97,7 @@ const TaskModal = ({ task, project, users, onClose, onSave }) => {
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Saving...' : (task ? 'Update Task' : 'Create Task')}
+              {loading ? 'Saving...' : (task ? 'Update Task' : 'Add Task')}
             </button>
           </div>
         </form>
@@ -135,18 +137,20 @@ const AddMemberModal = ({ project, onClose, onAdd }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">Add Member</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <h2 className="modal-title">Invite Member</h2>
+          <button className="modal-close" onClick={onClose}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
-        {error && <div className="error-msg">{error}</div>}
+        {error && <div className="error-msg">⚠️ {error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">User Email</label>
-            <input className="form-input" type="email" placeholder="user@example.com"
+            <label className="form-label">Email Address</label>
+            <input className="form-input" type="email" placeholder="colleague@nexusflow.app"
               value={email} onChange={e => setEmail(e.target.value)} required />
           </div>
           <div className="form-group">
-            <label className="form-label">Role</label>
+            <label className="form-label">Access Level</label>
             <select className="form-input" value={role} onChange={e => setRole(e.target.value)}>
               <option value="member">Member</option>
               <option value="admin">Admin</option>
@@ -155,7 +159,7 @@ const AddMemberModal = ({ project, onClose, onAdd }) => {
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Adding...' : 'Add Member'}
+              {loading ? 'Sending Invite...' : 'Send Invite'}
             </button>
           </div>
         </form>
@@ -165,9 +169,9 @@ const AddMemberModal = ({ project, onClose, onAdd }) => {
 };
 
 const COLUMNS = [
-  { key: 'todo', label: 'To Do', color: '#94a3b8' },
-  { key: 'in-progress', label: 'In Progress', color: '#6366f1' },
-  { key: 'completed', label: 'Completed', color: '#10b981' },
+  { key: 'todo', label: 'To Do', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.1)' },
+  { key: 'in-progress', label: 'In Progress', color: '#6366f1', bg: 'rgba(99, 102, 241, 0.1)' },
+  { key: 'completed', label: 'Completed', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
 ];
 
 const ProjectDetailPage = () => {
@@ -196,10 +200,10 @@ const ProjectDetailPage = () => {
       setTasks(tasksRes.data);
     }).catch(() => navigate('/projects'))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, navigate]);
 
   const handleDeleteTask = async (taskId) => {
-    if (!window.confirm('Delete this task?')) return;
+    if (!window.confirm('Delete this task forever?')) return;
     try {
       await api.delete(`/tasks/${taskId}`);
       setTasks(tasks.filter(t => t._id !== taskId));
@@ -216,112 +220,145 @@ const ProjectDetailPage = () => {
     }
   };
 
-  if (loading) return <div className="loading"><div className="spinner"></div>Loading project...</div>;
+  if (loading) return (
+    <div className="loading-container">
+      <div className="pulse-ring"></div>
+      <p>Loading project details...</p>
+    </div>
+  );
   if (!project) return null;
 
   const overdueTasks = tasks.filter(t => t.isOverdue).length;
 
   return (
-    <div className="project-detail">
-      <div className="page-header">
-        <div>
-          <button className="back-btn" onClick={() => navigate('/projects')}>← Projects</button>
-          <h1 className="page-title">{project.name}</h1>
-          {project.description && <p className="page-subtitle">{project.description}</p>}
-        </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          {isAdmin && (
-            <>
-              <button className="btn btn-secondary btn-sm" onClick={() => setAddMember(true)}>+ Member</button>
-              <button className="btn btn-primary btn-sm" onClick={() => setTaskModal('new')}>+ Task</button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Project meta */}
-      <div className="project-meta-bar">
-        <div className="meta-item">
-          <span className="meta-label">Status</span>
-          <span className={`badge badge-${project.status}`}>{project.status}</span>
-        </div>
-        <div className="meta-item">
-          <span className="meta-label">Members</span>
-          <div className="member-avatars">
-            {project.members?.slice(0, 5).map(m => m.user && (
-              <div key={m.user._id} className="member-avatar" title={`${m.user.name} (${m.role})`}>
-                {m.user.name?.[0]?.toUpperCase()}
-              </div>
-            ))}
-            {project.members?.length > 5 && (
-              <div className="member-avatar member-avatar-extra">+{project.members.length - 5}</div>
+    <div className="project-detail modern-detail">
+      <div className="detail-header-wrapper">
+        <button className="modern-back-btn" onClick={() => navigate('/projects')}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Back to Projects
+        </button>
+        
+        <div className="detail-header-content">
+          <div className="header-left">
+            <h1 className="detail-title">{project.name}</h1>
+            {project.description && <p className="detail-subtitle">{project.description}</p>}
+          </div>
+          <div className="header-actions">
+            {isAdmin && (
+              <>
+                <button className="btn btn-secondary btn-sm" onClick={() => setAddMember(true)}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px'}}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                  Invite
+                </button>
+                <button className="btn btn-primary btn-sm" onClick={() => setTaskModal('new')}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px'}}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  New Task
+                </button>
+              </>
             )}
           </div>
         </div>
-        <div className="meta-item">
-          <span className="meta-label">Tasks</span>
-          <span>{tasks.length} total, {overdueTasks > 0 ? <span style={{color:'#ef4444'}}>{overdueTasks} overdue</span> : '0 overdue'}</span>
-        </div>
-        {project.dueDate && (
-          <div className="meta-item">
-            <span className="meta-label">Due</span>
-            <span>{new Date(project.dueDate).toLocaleDateString()}</span>
+
+        <div className="modern-meta-bar glass">
+          <div className="meta-block">
+            <span className="meta-sub">Status</span>
+            <span className={`badge badge-${project.status} pill`}>{project.status}</span>
           </div>
-        )}
+          <div className="meta-separator"></div>
+          <div className="meta-block">
+            <span className="meta-sub">Team</span>
+            <div className="avatar-group">
+              {project.members?.slice(0, 4).map(m => m.user && (
+                <div key={m.user._id} className="avatar-group-item" title={`${m.user.name}`}>
+                  {m.user.name?.[0]?.toUpperCase()}
+                </div>
+              ))}
+              {project.members?.length > 4 && (
+                <div className="avatar-group-item extra">+{project.members.length - 4}</div>
+              )}
+            </div>
+          </div>
+          <div className="meta-separator"></div>
+          <div className="meta-block">
+            <span className="meta-sub">Progress</span>
+            <div className="meta-stat-text">
+              <strong>{tasks.filter(t => t.status === 'completed').length}</strong> / {tasks.length} tasks
+            </div>
+          </div>
+          <div className="meta-separator"></div>
+          <div className="meta-block">
+            <span className="meta-sub">Health</span>
+            <div className={`meta-stat-text ${overdueTasks > 0 ? 'text-danger' : 'text-success'}`}>
+              {overdueTasks > 0 ? `${overdueTasks} Overdue` : 'On Track'}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Tabs */}
-      <div className="tabs">
-        <button className={`tab ${activeTab === 'board' ? 'tab-active' : ''}`} onClick={() => setActiveTab('board')}>
-          Board
-        </button>
-        <button className={`tab ${activeTab === 'list' ? 'tab-active' : ''}`} onClick={() => setActiveTab('list')}>
-          List
-        </button>
-        <button className={`tab ${activeTab === 'members' ? 'tab-active' : ''}`} onClick={() => setActiveTab('members')}>
-          Members
-        </button>
+      <div className="modern-tabs-container">
+        <div className="modern-tabs">
+          <button className={`modern-tab ${activeTab === 'board' ? 'active' : ''}`} onClick={() => setActiveTab('board')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+            Board
+          </button>
+          <button className={`modern-tab ${activeTab === 'list' ? 'active' : ''}`} onClick={() => setActiveTab('list')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            List
+          </button>
+          <button className={`modern-tab ${activeTab === 'members' ? 'active' : ''}`} onClick={() => setActiveTab('members')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            Team
+          </button>
+        </div>
       </div>
 
-      {/* Board view */}
       {activeTab === 'board' && (
-        <div className="kanban-board">
+        <div className="kanban-wrapper">
           {COLUMNS.map(col => {
             const colTasks = tasks.filter(t => t.status === col.key);
             return (
-              <div key={col.key} className="kanban-col">
-                <div className="kanban-col-header" style={{ borderTopColor: col.color }}>
-                  <span>{col.label}</span>
-                  <span className="col-count">{colTasks.length}</span>
+              <div key={col.key} className="kanban-column" style={{'--col-color': col.color, '--col-bg': col.bg}}>
+                <div className="kanban-col-top">
+                  <div className="kanban-col-title">
+                    <span className="kanban-dot" style={{backgroundColor: col.color}}></span>
+                    {col.label}
+                  </div>
+                  <span className="kanban-count">{colTasks.length}</span>
                 </div>
-                <div className="kanban-tasks">
-                  {colTasks.map(task => (
-                    <div key={task._id} className={`task-card ${task.isOverdue ? 'task-overdue' : ''}`}>
-                      <div className="task-card-title">{task.title}</div>
-                      {task.description && <div className="task-card-desc">{task.description}</div>}
-                      <div className="task-card-footer">
-                        <span className={`badge badge-${task.priority}`}>{task.priority}</span>
-                        {task.assignedTo && (
-                          <span className="task-assignee">{task.assignedTo.name}</span>
+                
+                <div className="kanban-items">
+                  {colTasks.map((task, idx) => (
+                    <div key={task._id} className="kanban-card" style={{animationDelay: `${idx * 40}ms`}}>
+                      {task.isOverdue && <div className="kanban-overdue-bar"></div>}
+                      
+                      <div className="kanban-card-labels">
+                        <span className={`priority-dot priority-${task.priority}`} title={`Priority: ${task.priority}`}></span>
+                        {task.dueDate && (
+                          <span className={`kanban-due ${task.isOverdue ? 'due-overdue' : ''}`}>
+                            {new Date(task.dueDate).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}
+                          </span>
                         )}
                       </div>
-                      {task.dueDate && (
-                        <div className={`task-due ${task.isOverdue ? 'task-due-overdue' : ''}`}>
-                          📅 {new Date(task.dueDate).toLocaleDateString()}
-                          {task.isOverdue && ' — Overdue!'}
+                      
+                      <div className="kanban-card-title">{task.title}</div>
+                      
+                      <div className="kanban-card-bottom">
+                        <div className="kanban-card-actions">
+                          <button className="k-btn edit" onClick={() => setTaskModal(task)}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="16 3 21 8 8 21 3 21 3 16 16 3"></polygon></svg></button>
+                          {isAdmin && (
+                            <button className="k-btn delete" onClick={() => handleDeleteTask(task._id)}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                          )}
                         </div>
-                      )}
-                      <div className="task-card-actions">
-                        <button className="task-action-btn" onClick={() => setTaskModal(task)}>Edit</button>
-                        {isAdmin && (
-                          <button className="task-action-btn task-action-delete"
-                            onClick={() => handleDeleteTask(task._id)}>Delete</button>
+                        {task.assignedTo && (
+                          <div className="kanban-assignee" title={task.assignedTo.name}>
+                            {task.assignedTo.name[0]}
+                          </div>
                         )}
                       </div>
                     </div>
                   ))}
                   {colTasks.length === 0 && (
-                    <div className="kanban-empty">No tasks here</div>
+                    <div className="kanban-empty-drop">Drop tasks here</div>
                   )}
                 </div>
               </div>
@@ -330,75 +367,82 @@ const ProjectDetailPage = () => {
         </div>
       )}
 
-      {/* List view */}
       {activeTab === 'list' && (
-        <div className="card">
+        <div className="glass card table-card">
           {tasks.length === 0 ? (
-            <div className="empty-state"><div className="icon">📋</div><p>No tasks yet.</p></div>
+            <div className="empty-state">
+              <div className="icon">📋</div>
+              <p>No tasks yet in this view.</p>
+            </div>
           ) : (
-            <table className="task-table">
-              <thead>
-                <tr>
-                  <th>Task</th>
-                  <th>Status</th>
-                  <th>Priority</th>
-                  <th>Assigned To</th>
-                  <th>Due Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tasks.map(task => (
-                  <tr key={task._id} className={task.isOverdue ? 'row-overdue' : ''}>
-                    <td>
-                      <div className="table-task-title">{task.title}</div>
-                      {task.description && <div className="table-task-desc">{task.description}</div>}
-                    </td>
-                    <td><span className={`badge badge-${task.status}`}>{task.status}</span></td>
-                    <td><span className={`badge badge-${task.priority}`}>{task.priority}</span></td>
-                    <td>{task.assignedTo?.name || <span style={{color:'var(--text-muted)'}}>Unassigned</span>}</td>
-                    <td>
-                      {task.dueDate ? (
-                        <span className={task.isOverdue ? 'text-danger' : ''}>
-                          {new Date(task.dueDate).toLocaleDateString()}
-                        </span>
-                      ) : '—'}
-                    </td>
-                    <td>
-                      <div style={{display:'flex', gap:6}}>
-                        <button className="btn btn-secondary btn-sm" onClick={() => setTaskModal(task)}>Edit</button>
-                        {isAdmin && (
-                          <button className="btn btn-danger btn-sm" onClick={() => handleDeleteTask(task._id)}>Del</button>
-                        )}
-                      </div>
-                    </td>
+            <div className="table-responsive">
+              <table className="modern-table">
+                <thead>
+                  <tr>
+                    <th>Task</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Assignee</th>
+                    <th>Due</th>
+                    <th></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {tasks.map(task => (
+                    <tr key={task._id} className={task.isOverdue ? 'tr-overdue' : ''}>
+                      <td>
+                        <div className="td-title">{task.title}</div>
+                        {task.description && <div className="td-desc">{task.description}</div>}
+                      </td>
+                      <td><span className={`badge badge-${task.status}`}>{task.status}</span></td>
+                      <td><span className={`priority-text text-${task.priority}`}>{task.priority}</span></td>
+                      <td>
+                        {task.assignedTo ? (
+                           <div className="td-assignee">
+                             <div className="avatar-xs">{task.assignedTo.name[0]}</div>
+                             {task.assignedTo.name}
+                           </div>
+                        ) : <span className="unassigned-text">Unassigned</span>}
+                      </td>
+                      <td>
+                        {task.dueDate ? (
+                          <span className={task.isOverdue ? 'text-danger fw-bold' : ''}>
+                            {new Date(task.dueDate).toLocaleDateString()}
+                          </span>
+                        ) : '—'}
+                      </td>
+                      <td className="td-actions">
+                        <button className="action-icon-btn" onClick={() => setTaskModal(task)}>✏️</button>
+                        {isAdmin && (
+                          <button className="action-icon-btn delete-icon" onClick={() => handleDeleteTask(task._id)}>🗑️</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
 
-      {/* Members tab */}
       {activeTab === 'members' && (
-        <div className="card">
-          <div className="members-list">
+        <div className="glass card p-0">
+          <div className="modern-members-list">
             {project.members?.map(m => m.user && (
-              <div key={m.user._id} className="member-row">
-                <div className="member-row-avatar">{m.user.name?.[0]?.toUpperCase()}</div>
-                <div className="member-row-info">
-                  <div className="member-row-name">{m.user.name}</div>
-                  <div className="member-row-email">{m.user.email}</div>
+              <div key={m.user._id} className="modern-member-row">
+                <div className="modern-member-avatar">{m.user.name?.[0]?.toUpperCase()}</div>
+                <div className="modern-member-info">
+                  <div className="modern-member-name">{m.user.name}</div>
+                  <div className="modern-member-email">{m.user.email}</div>
                 </div>
-                <span className={`badge badge-${m.role}`}>{m.role}</span>
+                <span className={`badge badge-${m.role} pill`}>{m.role}</span>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Modals */}
       {(taskModal === 'new' || (taskModal && taskModal._id)) && (
         <TaskModal
           task={taskModal === 'new' ? null : taskModal}
